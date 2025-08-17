@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  # 数据库服务
+  database:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: edu_user
+      POSTGRES_PASSWORD: edu_password
+      POSTGRES_DB: edu_management
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgresql://edu_user:edu_password@database:5432/edu_management
+      - JWT_SECRET_KEY=super-secret-key
+    depends_on:
+      - database
+    volumes:
+      - ./backend:/app
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

@@ -1,0 +1,19 @@
+{
+  "name": "edu-management-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "vue": "^3.3.4",
+    "vue-router": "^4.2.4",
+    "axios": "^1.4.0",
+    "element-plus": "^2.3.8"
+  },
+  "devDependencies": {
+    "@vue/cli-service": "~5.0.0"
+  }
+}
