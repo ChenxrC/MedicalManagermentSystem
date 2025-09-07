@@ -1,0 +1,39 @@
+// 颜色变量
+$primary-color: #409eff;
+$success-color: #67c23a;
+$warning-color: #e6a23c;
+$danger-color: #f56c6c;
+$info-color: #909399;
+
+// 科技风格颜色
+$tech-blue: #00d4ff;
+$tech-purple: #7c3aed;
+$tech-cyan: #06b6d4;
+$tech-indigo: #6366f1;
+$tech-dark: #1e293b;
+$tech-darker: #0f172a;
+
+// 渐变背景
+$gradient-primary: linear-gradient(135deg, $tech-blue 0%, $tech-purple 100%);
+$gradient-secondary: linear-gradient(135deg, $tech-cyan 0%, $tech-indigo 100%);
+$gradient-dark: linear-gradient(135deg, $tech-dark 0%, $tech-darker 100%);
+
+// 阴影
+$shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+$shadow-medium: 0 4px 20px 0 rgba(0, 0, 0, 0.15);
+$shadow-heavy: 0 8px 30px 0 rgba(0, 0, 0, 0.2);
+$shadow-glow: 0 0 20px rgba(0, 212, 255, 0.3);
+
+// 边框半径
+$border-radius-small: 4px;
+$border-radius-medium: 8px;
+$border-radius-large: 12px;
+$border-radius-xl: 16px;
+
+// 间距
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-xxl: 48px;

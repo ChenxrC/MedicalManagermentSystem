@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录输入框测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #409eff;
+            box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #409eff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background: #337ecc;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h2>输入框测试</h2>
+        <p>请测试以下输入框是否可以正常输入：</p>
+        
+        <div class="form-group">
+            <label for="username">用户名：</label>
+            <input type="text" id="username" placeholder="请输入用户名" />
+        </div>
+        
+        <div class="form-group">
+            <label for="password">密码：</label>
+            <input type="password" id="password" placeholder="请输入密码" />
+        </div>
+        
+        <button onclick="testInput()">测试输入</button>
+        
+        <div id="result" style="margin-top: 20px; padding: 10px; background: #f0f0f0; border-radius: 6px; display: none;">
+            <strong>输入结果：</strong>
+            <div id="result-content"></div>
+        </div>
+    </div>
+    
+    <script>
+        function testInput() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('result-content');
+            
+            resultContent.innerHTML = `
+                <p>用户名: ${username || '未输入'}</p>
+                <p>密码: ${password ? '已输入' : '未输入'}</p>
+            `;
+            
+            resultDiv.style.display = 'block';
+        }
+        
+        // 添加键盘事件监听
+        document.addEventListener('keydown', function(e) {
+            console.log('按键事件:', e.key, e.target.tagName);
+        });
+        
+        // 添加输入事件监听
+        document.addEventListener('input', function(e) {
+            console.log('输入事件:', e.target.value, e.target.tagName);
+        });
+    </script>
+</body>
+</html>
