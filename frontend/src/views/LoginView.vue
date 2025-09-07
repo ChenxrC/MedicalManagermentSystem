@@ -1,10 +1,10 @@
 <template>
-  <div class="login">
-    <el-card class="login-card">
+  <div class="login page-container">
+    <el-card class="login-card enhanced-card">
       <div slot="header" class="clearfix">
         <span>用户登录</span>
       </div>
-      <el-form :model="loginForm" :rules="rules" ref="loginForm" label-width="80px">
+      <el-form :model="loginForm" :rules="rules" ref="loginForm" label-width="80px" class="enhanced-form">
         <el-form-item label="用户名" prop="username">
           <el-input v-model="loginForm.username" placeholder="请输入用户名"></el-input>
         </el-form-item>
@@ -12,8 +12,8 @@
           <el-input v-model="loginForm.password" type="password" placeholder="请输入密码"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleLogin" :loading="loading">登录</el-button>
-          <el-button @click="handleRegister">注册</el-button>
+          <el-button type="primary" @click="handleLogin" :loading="loading" class="enhanced-button">登录</el-button>
+          <el-button @click="handleRegister" class="enhanced-button">注册</el-button>
         </el-form-item>
       </el-form>
     </el-card>
@@ -62,7 +62,7 @@ export default {
             window.dispatchEvent(new Event('auth-status-changed'))
             
             // 登录成功后跳转到首页
-            this.$router.push('/')
+            this.$router.push('/');
           } catch (error) {
             // 显示错误消息
             this.$message.error(error.response?.data?.message || '登录失败')

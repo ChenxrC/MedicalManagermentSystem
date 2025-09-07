@@ -1,12 +1,13 @@
 <template>
-  <div class="courses">
-    <el-card class="header-card">
+  <div class="courses page-container">
+    <el-card class="header-card enhanced-card">
       <template #header>
         <div class="card-header">
           <span class="card-title">课程管理</span>
           <el-button 
             v-if="userRole === 'teacher' || userRole === 'admin'" 
             type="primary" 
+            class="enhanced-button"
             @click="onCreateCourse"
           >
             创建课程
@@ -14,18 +15,19 @@
         </div>
       </template>
       <div class="card-content">
-        <el-table :data="courses" style="width: 100%;" v-loading="loading" stripe>
+        <el-table :data="courses" style="width: 100%;" v-loading="loading" stripe class="enhanced-table">
           <el-table-column prop="id" label="ID" width="80" />
           <el-table-column prop="title" label="课程名称" />
           <el-table-column prop="description" label="描述" />
           <el-table-column prop="created_at" label="创建时间" />
           <el-table-column label="操作" width="200">
             <template #default="scope">
-              <el-button size="small" @click="viewCourse(scope.row)">查看</el-button>
+              <el-button size="small" class="enhanced-button" @click="viewCourse(scope.row)">查看</el-button>
               <el-button 
                 v-if="userRole === 'teacher' || userRole === 'admin'" 
                 size="small" 
                 type="danger" 
+                class="enhanced-button"
                 @click="onDelete(scope.row)"
               >
                 删除
@@ -36,8 +38,8 @@
       </div>
     </el-card>
     
-    <el-dialog v-model="dialogVisible" title="课程信息" width="500px" top="10vh">
-      <el-form :model="courseForm" label-width="100px" :rules="courseRules" ref="courseForm">
+    <el-dialog v-model="dialogVisible" title="课程信息" width="500px" top="10vh" class="enhanced-dialog">
+      <el-form :model="courseForm" label-width="100px" :rules="courseRules" ref="courseForm" class="enhanced-form">
         <el-form-item label="课程名称" prop="title">
           <el-input v-model="courseForm.title" placeholder="请输入课程名称" />
         </el-form-item>
@@ -52,6 +54,7 @@
             type="primary" 
             @click="saveCourse" 
             :loading="saving"
+            class="enhanced-button"
           >
             保存
           </el-button>

@@ -1,12 +1,13 @@
 <template>
-  <div class="documents">
-    <el-card class="header-card">
+  <div class="documents page-container">
+    <el-card class="header-card enhanced-card">
       <template #header>
         <div class="card-header">
           <span class="card-title">课件/知识库管理</span>
           <el-button 
             v-if="userRole === 'teacher' || userRole === 'admin'" 
             type="primary" 
+            class="enhanced-button"
             @click="onUploadDocument"
           >
             上传文档
@@ -14,20 +15,39 @@
         </div>
       </template>
       <div class="card-content">
-        <el-table :data="documents" style="width: 100%;" v-loading="loading" stripe>
+        <el-table :data="documents" style="width: 100%;" v-loading="loading" stripe class="enhanced-table">
           <el-table-column prop="id" label="ID" width="80" />
           <el-table-column prop="title" label="文档名称" />
           <el-table-column prop="created_at" label="上传日期" />
           <el-table-column label="操作" width="200">
             <template #default="scope">
-              <el-button size="small" @click="onView(scope.row)">查看</el-button>
+              <el-button size="small" class="enhanced-button" @click="onView(scope.row)">查看</el-button>
               <el-button 
-                v-if="userRole === 'teacher' || userRole === 'admin'" 
+                v-if="userRole === 'teacher' || userRole === 'admin'"
                 size="small" 
                 type="danger" 
+                class="enhanced-button"
                 @click="onDelete(scope.row)"
               >
                 删除
+              </el-button>
+              <el-button 
+                v-if="userRole === 'admin' && !scope.row.published"
+                size="small" 
+                type="primary" 
+                class="enhanced-button"
+                @click="publishToHomepage(scope.row)"
+              >
+                发布到主页
+              </el-button>
+              <el-button 
+                v-if="userRole === 'admin' && scope.row.published"
+                size="small" 
+                type="success" 
+                disabled
+                class="enhanced-button"
+              >
+                已发布
               </el-button>
             </template>
           </el-table-column>
@@ -35,8 +55,8 @@
       </div>
     </el-card>
     
-    <el-dialog v-model="uploadDialogVisible" title="上传文档" width="500px" top="10vh">
-      <el-form :model="documentForm" label-width="100px" :rules="documentRules" ref="documentForm">
+    <el-dialog v-model="uploadDialogVisible" title="上传文档" width="500px" top="10vh" class="enhanced-dialog">
+      <el-form :model="documentForm" label-width="100px" :rules="documentRules" ref="documentForm" class="enhanced-form">
         <el-form-item label="文档名称" prop="title">
           <el-input v-model="documentForm.title" placeholder="请输入文档名称" />
         </el-form-item>
@@ -61,6 +81,7 @@
             type="primary" 
             @click="uploadDocument" 
             :loading="uploading"
+            class="enhanced-button"
           >
             上传
           </el-button>
@@ -68,8 +89,8 @@
       </template>
     </el-dialog>
     
-    <el-dialog v-model="viewDialogVisible" title="查看文档" width="800px" top="5vh">
-      <el-card class="document-card">
+    <el-dialog v-model="viewDialogVisible" title="查看文档" width="800px" top="5vh" class="enhanced-dialog">
+      <el-card class="document-card enhanced-card">
         <template #header>
           <div class="card-header">
             <span class="document-title">{{ currentDocument.title }}</span>
@@ -87,7 +108,7 @@
 </template>
 
 <script>
-import { getDocuments, uploadDocument, getCourses } from '@/services/api'
+import { getDocuments, uploadDocument, getCourses, publishDocumentToHomepage } from '@/services/api'
 import { getUserInfo } from '@/services/auth'
 
 export default {
@@ -167,6 +188,16 @@ export default {
     onDelete(row) {
       this.$message.info('删除功能待实现')
     },
+    async publishToHomepage(row) {
+      try {
+        await publishDocumentToHomepage(row.id)
+        row.published = true
+        row.published_at = new Date().toISOString()
+        this.$message.success('文档已成功发布到主页')
+      } catch (error) {
+        this.$message.error('发布失败: ' + error.message)
+      }
+    },
     async uploadDocument() {
       this.$refs.documentForm.validate(async (valid) => {
         if (valid) {
@@ -227,12 +258,12 @@ export default {
 .document-title {
   font-size: 20px;
   font-weight: bold;
+  color: #409eff;
 }
 
 .document-content {
+  text-align: left;
   padding: 20px;
-  min-height: 300px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+  line-height: 1.6;
 }
 </style>

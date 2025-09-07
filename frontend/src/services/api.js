@@ -50,19 +50,21 @@ export const createCourse = (courseData) => api.post('/courses', courseData)
 
 // 文档相关API
 export const getDocuments = () => api.get('/documents')
-export const uploadDocument = (file) => {
-  const formData = new FormData()
-  formData.append('file', file)
-  return api.post('/documents', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  })
-}
+export const getPublishedDocuments = () => api.get('/documents/published')
+export const uploadDocument = (documentData) => api.post('/documents', documentData)
+
+export const publishDocumentToHomepage = (documentId) => api.put(`/documents/${documentId}/publish`)
 
 // 考试相关API
 export const getExams = () => api.get('/exams')
 export const getQuestions = () => api.get('/questions')
 export const createExam = (examData) => api.post('/exams', examData)
+
+// 用户管理相关API
+export const getUsers = () => api.get('/users')
+export const createUser = (userData) => api.post('/users', userData)
+export const updateUser = (userId, userData) => api.put(`/users/${userId}`, userData)
+export const deleteUser = (userId) => api.delete(`/users/${userId}`)
+export const changeUserPassword = (userId, passwordData) => api.put(`/users/${userId}/password`, passwordData)
 
 export default api

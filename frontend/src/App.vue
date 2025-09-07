@@ -1,10 +1,11 @@
 <template>
   <div id="app">
-    <nav>
+    <nav class="navbar">
       <router-link to="/">首页</router-link> |
       <router-link to="/courses">课程管理</router-link> |
       <router-link to="/documents">文档管理</router-link> |
       <router-link to="/exams">考试系统</router-link> |
+      <router-link to="/users">人员管理</router-link> |
       <router-link to="/chatbot">知识库问答</router-link>
       <template v-if="!isAuthenticated">
         | <router-link to="/login">登录</router-link> |
