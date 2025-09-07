@@ -1,8 +1,7 @@
-from app import create_app
+from app import app
 from models import User, db
 
 def init_admin():
-    app = create_app()
     with app.app_context():
         # 检查是否已存在管理员用户
         admin = User.query.filter_by(username='admin').first()

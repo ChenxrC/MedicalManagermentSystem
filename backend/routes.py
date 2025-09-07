@@ -1,10 +1,9 @@
 from flask import Blueprint, request, jsonify
-current_user = None
+from extensions import create_access_token, jwt_required, get_jwt_identity
 
 # 导入模型和扩展
-from models import User, Course, Document, Question, Exam, ExamResult
-from app import db
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from models import User, Course, Document, Question, Exam, ExamResult, db
+from extensions import jwt
 
 api_bp = Blueprint('api', __name__)
 
@@ -18,28 +17,24 @@ def register():
     username = data.get('username')
     email = data.get('email')
     password = data.get('password')
-    role = data.get('role', 'student')  # 默认角色为学生
+    role = 'student'  # 禁止注册管理员账户，强制设为学生
     
     # 检查用户名和邮箱是否已存在
-    # 使用应用上下文进行数据库查询
-    from app import create_app
-    app = create_app()
-    with app.app_context():
-        if User.query.filter_by(username=username).first():
-            return jsonify({'message': 'Username already exists'}), 400
-        
-        if User.query.filter_by(email=email).first():
-            return jsonify({'message': 'Email already exists'}), 400
-        
-        # 创建新用户
-        user = User(username=username, email=email, role=role)
-        user.set_password(password)
-        
-        # 保存到数据库
-        db.session.add(user)
-        db.session.commit()
+    if User.query.filter_by(username=username).first():
+        return jsonify({'message': '用户名已存在'}), 400
     
-    return jsonify({'message': 'User registered successfully'}), 201
+    if User.query.filter_by(email=email).first():
+        return jsonify({'message': '邮箱已存在'}), 400
+    
+    # 创建新用户
+    user = User(username=username, email=email, role=role)
+    user.set_password(password)
+    
+    # 保存到数据库
+    db.session.add(user)
+    db.session.commit()
+    
+    return jsonify({'message': '用户注册成功'}), 201
 
 @api_bp.route('/auth/login', methods=['POST'])
 def login():
@@ -47,19 +42,18 @@ def login():
     username = data.get('username')
     password = data.get('password')
     
-    # 使用应用上下文进行数据库查询
-    from app import create_app
-    app = create_app()
-    with app.app_context():
-        # 查找用户
-        user = User.query.filter_by(username=username).first()
-        
-        # 验证用户和密码
-        if not user or not user.check_password(password):
-            return jsonify({'message': 'Invalid username or password'}), 401
-        
-        # 创建访问令牌
-        access_token = create_access_token(identity=user.id)
+    # 查找用户
+    user = User.query.filter_by(username=username).first()
+    
+    # 验证用户和密码
+    if not user or not user.check_password(password):
+        return jsonify({'message': 'Invalid username or password'}), 401
+    
+    # 创建访问令牌
+    access_token = create_access_token(identity=str(user.id))
+    
+    # 根据用户角色定义权限
+    permissions = get_user_permissions(user.role)
     
     return jsonify({
         'message': 'User logged in successfully',
@@ -68,9 +62,62 @@ def login():
             'id': user.id,
             'username': user.username,
             'email': user.email,
-            'role': user.role
+            'role': user.role,
+            'permissions': permissions
         }
     }), 200
+
+@api_bp.route('/auth/me', methods=['GET'])
+@jwt_required()
+def get_current_user():
+    # 获取当前用户ID
+    current_user_id = get_jwt_identity()
+    
+    # 查找当前用户
+    user = User.query.get(current_user_id)
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+    
+    # 获取用户权限
+    permissions = get_user_permissions(user.role)
+    
+    return jsonify({
+        'user': {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role': user.role,
+            'permissions': permissions
+        }
+    }), 200
+
+def get_user_permissions(role):
+    """根据用户角色返回对应的权限列表"""
+    # 定义不同角色的权限
+    permissions_map = {
+        'admin': [
+            'view_users', 'create_users', 'update_users', 'delete_users',
+            'view_courses', 'create_courses', 'update_courses', 'delete_courses',
+            'view_documents', 'create_documents', 'update_documents', 'delete_documents',
+            'view_exams', 'create_exams', 'update_exams', 'delete_exams',
+            'view_results', 'manage_system'
+        ],
+        'teacher': [
+            'view_courses', 'create_courses', 'update_courses', 'delete_courses',
+            'view_documents', 'create_documents', 'update_documents', 'delete_documents',
+            'view_exams', 'create_exams', 'update_exams', 'delete_exams',
+            'view_results'
+        ],
+        'student': [
+            'view_courses',
+            'view_documents',
+            'take_exams',
+            'view_own_results'
+        ]
+    }
+    
+    # 返回对应角色的权限，如果角色不存在则返回空列表
+    return permissions_map.get(role, [])
 
 @api_bp.route('/courses', methods=['GET'])
 def get_courses():
@@ -207,52 +254,14 @@ def get_questions():
             'id': question.id,
             'content': question.content,
             'options': question.options,
-            'answer': question.answer,
-            'type': question.type,
-            'created_at': question.created_at
+            'correct_answer': question.correct_answer,
+            'exam_id': question.exam_id
         })
     return jsonify({'questions': questions_data}), 200
 
-@api_bp.route('/questions', methods=['POST'])
-@jwt_required()
-def create_question():
-    # 获取当前用户ID
-    current_user_id = get_jwt_identity()
-    
-    # 检查用户是否为教师或管理员
-    user = User.query.get(current_user_id)
-    if user.role not in ['teacher', 'admin']:
-        return jsonify({'message': '只有教师和管理员可以创建题目'}), 403
-    
-    # 获取请求数据
-    data = request.get_json()
-    content = data.get('content')
-    options = data.get('options')
-    answer = data.get('answer')
-    q_type = data.get('type')
-    
-    # 创建新题目
-    question = Question(content=content, options=options, answer=answer, type=q_type)
-    
-    # 保存到数据库
-    db.session.add(question)
-    db.session.commit()
-    
-    return jsonify({
-        'message': 'Question created successfully',
-        'question': {
-            'id': question.id,
-            'content': question.content,
-            'options': question.options,
-            'answer': question.answer,
-            'type': question.type,
-            'created_at': question.created_at
-        }
-    }), 201
-
 @api_bp.route('/exams', methods=['GET'])
 def get_exams():
-    # 获取试卷列表
+    # 获取考试列表
     exams = Exam.query.all()
     exams_data = []
     for exam in exams:
@@ -260,7 +269,6 @@ def get_exams():
             'id': exam.id,
             'title': exam.title,
             'course_id': exam.course_id,
-            'questions': exam.questions,
             'created_at': exam.created_at
         })
     return jsonify({'exams': exams_data}), 200
@@ -274,21 +282,20 @@ def create_exam():
     # 检查用户是否为教师或管理员
     user = User.query.get(current_user_id)
     if user.role not in ['teacher', 'admin']:
-        return jsonify({'message': '只有教师和管理员可以创建试卷'}), 403
+        return jsonify({'message': '只有教师和管理员可以创建考试'}), 403
     
     # 获取请求数据
     data = request.get_json()
     title = data.get('title')
     course_id = data.get('course_id')
-    questions = data.get('questions', [])
     
     # 检查课程是否存在
     course = Course.query.get(course_id)
     if not course:
         return jsonify({'message': '课程不存在'}), 404
     
-    # 创建新试卷
-    exam = Exam(title=title, course_id=course_id, questions=questions)
+    # 创建新考试
+    exam = Exam(title=title, course_id=course_id)
     
     # 保存到数据库
     db.session.add(exam)
@@ -300,42 +307,35 @@ def create_exam():
             'id': exam.id,
             'title': exam.title,
             'course_id': exam.course_id,
-            'questions': exam.questions,
             'created_at': exam.created_at
         }
     }), 201
 
-@api_bp.route('/exams/<int:exam_id>/submit', methods=['POST'])
+@api_bp.route('/exam-results', methods=['POST'])
 @jwt_required()
-def submit_exam(exam_id):
+def submit_exam():
     # 获取当前用户ID
     current_user_id = get_jwt_identity()
     
-    # 检查用户是否为学生
-    user = User.query.get(current_user_id)
-    if user.role != 'student':
-        return jsonify({'message': '只有学生可以提交考试'}), 403
+    # 获取请求数据
+    data = request.get_json()
+    exam_id = data.get('exam_id')
+    answers = data.get('answers')
     
-    # 获取考试
+    # 检查考试是否存在
     exam = Exam.query.get(exam_id)
     if not exam:
         return jsonify({'message': '考试不存在'}), 404
     
-    # 获取请求数据
-    data = request.get_json()
-    answers = data.get('answers', [])
-    
-    # 计算分数（简化实现）
+    # 计算分数
     score = 0
-    total_questions = len(exam.questions)
+    for answer in answers:
+        question = Question.query.get(answer['question_id'])
+        if question and question.correct_answer == answer['answer']:
+            score += 1
     
     # 创建考试结果
-    exam_result = ExamResult(
-        exam_id=exam_id,
-        student_id=current_user_id,
-        score=score,
-        answers=answers
-    )
+    exam_result = ExamResult(exam_id=exam_id, student_id=current_user_id, score=score, answers=answers)
     
     # 保存到数据库
     db.session.add(exam_result)
@@ -343,7 +343,7 @@ def submit_exam(exam_id):
     
     return jsonify({
         'message': 'Exam submitted successfully',
-        'result': {
+        'exam_result': {
             'id': exam_result.id,
             'exam_id': exam_result.exam_id,
             'student_id': exam_result.student_id,
