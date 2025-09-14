@@ -9,27 +9,32 @@
       <h2>请选择您的身份</h2>
       
       <div class="role-cards">
-        <el-card class="role-card student-card" @click="goToStudent">
+        <!-- 使用原生HTML替代Element Plus卡片和按钮 -->
+        <div class="role-card student-card">
           <div class="card-content">
             <div class="icon-container">
-              <el-icon size="60" color="#409eff"><User /></el-icon>
+              <div class="user-icon">👤</div>
             </div>
             <h3>学员入口</h3>
             <p>查看考试列表，参加考试，查看成绩</p>
-            <el-button type="primary" size="large">进入学员系统</el-button>
+            <button class="native-button student-button" onclick="console.log('学员按钮点击'); window.location.href='/student-login'">
+              进入学员系统
+            </button>
           </div>
-        </el-card>
+        </div>
 
-        <el-card class="role-card admin-card" @click="goToAdmin">
+        <div class="role-card admin-card">
           <div class="card-content">
             <div class="icon-container">
-              <el-icon size="60" color="#67c23a"><Setting /></el-icon>
+              <div class="admin-icon">⚙️</div>
             </div>
             <h3>管理员入口</h3>
             <p>创建试卷，管理考试，查看成绩</p>
-            <el-button type="success" size="large">进入管理系统</el-button>
+            <button class="native-button admin-button" onclick="console.log('管理员按钮点击'); window.location.href='/admin'">
+              进入管理系统
+            </button>
           </div>
-        </el-card>
+        </div>
       </div>
     </div>
 
@@ -37,22 +42,22 @@
       <h2>系统功能</h2>
       <div class="feature-grid">
         <div class="feature-item">
-          <el-icon size="40" color="#409eff"><Document /></el-icon>
+          <div class="feature-icon">📄</div>
           <h4>试卷管理</h4>
           <p>支持多种题型，灵活配置试卷</p>
         </div>
         <div class="feature-item">
-          <el-icon size="40" color="#67c23a"><VideoCamera /></el-icon>
+          <div class="feature-icon">🎥</div>
           <h4>视频录制</h4>
           <p>考试过程全程录制，确保公平</p>
         </div>
         <div class="feature-item">
-          <el-icon size="40" color="#e6a23c"><Trophy /></el-icon>
+          <div class="feature-icon">🏆</div>
           <h4>自动评分</h4>
           <p>选择题自动评分，提高效率</p>
         </div>
         <div class="feature-item">
-          <el-icon size="40" color="#f56c6c"><Warning /></el-icon>
+          <div class="feature-icon">⚠️</div>
           <h4>错题分析</h4>
           <p>详细的错题分析，帮助学习</p>
         </div>
@@ -62,35 +67,8 @@
 </template>
 
 <script>
-import { useRouter } from 'vue-router'
-import { User, Setting, Document, VideoCamera, Trophy, Warning } from '@element-plus/icons-vue'
-
 export default {
-  name: 'HomePage',
-  components: {
-    User,
-    Setting,
-    Document,
-    VideoCamera,
-    Trophy,
-    Warning
-  },
-  setup() {
-    const router = useRouter()
-
-    const goToStudent = () => {
-      router.push('/student-login')
-    }
-
-    const goToAdmin = () => {
-      router.push('/admin')
-    }
-
-    return {
-      goToStudent,
-      goToAdmin
-    }
-  }
+  name: 'HomePage'
 }
 </script>
 
@@ -99,6 +77,10 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
+  background: white;
+  color: black;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .hero-section {
@@ -108,13 +90,13 @@ export default {
 
 .hero-section h1 {
   font-size: 48px;
-  color: #303133;
+  color: black;
   margin-bottom: 20px;
 }
 
 .hero-section p {
   font-size: 18px;
-  color: #606266;
+  color: #333;
   max-width: 600px;
   margin: 0 auto;
 }
@@ -126,7 +108,7 @@ export default {
 .role-selection h2 {
   text-align: center;
   margin-bottom: 40px;
-  color: #303133;
+  color: black;
 }
 
 .role-cards {
@@ -138,9 +120,24 @@ export default {
 
 .role-card {
   width: 300px;
-  cursor: pointer;
   transition: all 0.3s;
   border: 2px solid transparent;
+  background: white !important;
+  color: black !important;
+  position: relative;
+}
+
+/* 确保按钮可以被点击 */
+.card-content {
+  position: relative;
+  z-index: 1;
+}
+
+.el-button {
+  position: relative;
+  z-index: 10;
+  cursor: pointer !important;
+  pointer-events: auto !important;
 }
 
 .role-card:hover {
@@ -167,12 +164,12 @@ export default {
 
 .card-content h3 {
   font-size: 24px;
-  color: #303133;
+  color: black;
   margin-bottom: 15px;
 }
 
 .card-content p {
-  color: #606266;
+  color: #333;
   margin-bottom: 25px;
   line-height: 1.6;
 }
@@ -183,7 +180,7 @@ export default {
 
 .features h2 {
   margin-bottom: 40px;
-  color: #303133;
+  color: black;
 }
 
 .feature-grid {
@@ -194,9 +191,10 @@ export default {
 
 .feature-item {
   padding: 30px 20px;
-  background: #f8f9fa;
+  background: white;
   border-radius: 12px;
   transition: all 0.3s;
+  border: 1px solid #e0e0e0;
 }
 
 .feature-item:hover {
@@ -207,12 +205,12 @@ export default {
 
 .feature-item h4 {
   margin: 15px 0 10px 0;
-  color: #303133;
+  color: black;
   font-size: 18px;
 }
 
 .feature-item p {
-  color: #606266;
+  color: #333;
   line-height: 1.6;
 }
 

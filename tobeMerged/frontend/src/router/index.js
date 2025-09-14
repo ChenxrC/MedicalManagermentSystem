@@ -3,10 +3,16 @@ import Viewer from '@/views/Viewer.vue'
 import { setupRouteGuards } from './guards'
 
 const routes = [
+  { path: '/', name: 'Home', component: () => import('@/views/HomeView.vue') },
   {
-    path: '/',
-    name: 'Home',
-    component: () => import('@/components/HomePage.vue')
+    path: '/login',
+    name: 'LoginView',
+    component: () => import('@/views/LoginView.vue')
+  },
+  {
+    path: '/register',
+    name: 'RegisterView',
+    component: () => import('@/views/RegisterView.vue')
   },
   {
     path: '/viewer',
@@ -30,10 +36,13 @@ const routes = [
   { path: '/evaluate-video/:recordingId', component: () => import('@/components/VideoEvaluation.vue') },
   // 新增管理页面路由
   { path: '/admin', component: () => import('@/components/AdminDashboard.vue') },
+  { path: '/admin/users', component: () => import('@/components/UserManagement.vue') },
   { path: '/admin/students', component: () => import('@/components/StudentManagement.vue') },
   { path: '/admin/exams', component: () => import('@/components/ExamManagement.vue') },
   { path: '/admin/assignments', component: () => import('@/components/AssignmentManagement.vue') },
-  { path: '/api-test', component: () => import('@/components/APITest.vue') }
+  { path: '/permission-test', component: () => import('@/views/PermissionTest.vue') },
+  { path: '/api-test', component: () => import('@/components/APITest.vue') },
+  { path: '/test-button', component: () => import('@/components/TestButton.vue') }
 ]
 
 const router = createRouter({

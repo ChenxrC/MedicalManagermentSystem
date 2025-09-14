@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>简单按钮测试</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f5f7fa;
+            font-family: Arial, sans-serif;
+        }
+        
+        h1 {
+            color: #303133;
+        }
+        
+        .test-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding: 30px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-button {
+            padding: 15px 30px;
+            font-size: 16px;
+            background-color: #409eff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 300px;
+        }
+        
+        .test-button:hover {
+            background-color: #66b1ff;
+        }
+        
+        .test-button:active {
+            background-color: #3a8ee6;
+        }
+        
+        .log-container {
+            margin-top: 30px;
+            width: 600px;
+            height: 200px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>简单按钮测试页面</h1>
+    
+    <div class="test-container">
+        <button class="test-button" id="btn1">测试跳转到学员登录页面</button>
+        <button class="test-button" id="btn2">测试跳转到管理员页面</button>
+        <button class="test-button" id="btn3">带随机参数跳转到学员登录页面</button>
+        <button class="test-button" id="btn4">测试跳转到首页</button>
+        <button class="test-button" id="btn5">仅记录日志（不跳转）</button>
+    </div>
+    
+    <div class="log-container" id="logContainer">
+        <div>日志输出：</div>
+    </div>
+    
+    <script>
+        // 日志记录函数
+        function log(message) {
+            const logContainer = document.getElementById('logContainer');
+            const logEntry = document.createElement('div');
+            logEntry.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // 为按钮添加事件监听器
+        document.getElementById('btn1').addEventListener('click', function() {
+            log('按钮1被点击：尝试跳转到 /student-login');
+            window.location.href = '/student-login';
+        });
+        
+        document.getElementById('btn2').addEventListener('click', function() {
+            log('按钮2被点击：尝试跳转到 /admin');
+            window.location.href = '/admin';
+        });
+        
+        document.getElementById('btn3').addEventListener('click', function() {
+            const timestamp = Date.now();
+            const url = '/student-login?t=' + timestamp;
+            log('按钮3被点击：尝试跳转到 ' + url);
+            window.location.href = url;
+        });
+        
+        document.getElementById('btn4').addEventListener('click', function() {
+            log('按钮4被点击：尝试跳转到 /');
+            window.location.href = '/';
+        });
+        
+        document.getElementById('btn5').addEventListener('click', function() {
+            log('按钮5被点击：仅记录日志，不执行跳转');
+        });
+        
+        log('页面已加载完成，可以开始测试');
+        
+        // 检查页面是否有任何错误
+        window.onerror = function(message, source, lineno, colno, error) {
+            log('JavaScript错误: ' + message);
+            return true;
+        };
+    </script>
+</body>
+</html>

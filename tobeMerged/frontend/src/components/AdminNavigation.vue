@@ -13,8 +13,13 @@
         <span>管理首页</span>
       </el-menu-item>
       
-      <el-menu-item index="/admin/students">
+      <el-menu-item index="/admin/users">
         <el-icon><User /></el-icon>
+        <span>用户管理</span>
+      </el-menu-item>
+      
+      <el-menu-item index="/admin/students">
+        <el-icon><Users /></el-icon>
         <span>学员管理</span>
       </el-menu-item>
       
@@ -43,7 +48,7 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Setting, User, Document, Connection, SwitchButton } from '@element-plus/icons-vue'
+import { Setting, User, Users, Document, Connection, SwitchButton } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/userStore'
 
 export default {

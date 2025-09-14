@@ -13,7 +13,20 @@
           <el-card class="stat-card">
             <div class="stat-content">
               <div class="stat-icon">
-                <el-icon size="40" color="#409eff"><User /></el-icon>
+                <el-icon size="40" color="#409eff"><Users /></el-icon>
+              </div>
+              <div class="stat-info">
+                <h3>{{ stats.userCount }}</h3>
+                <p>用户总数</p>
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+        <el-col :span="6">
+          <el-card class="stat-card">
+            <div class="stat-content">
+              <div class="stat-icon">
+                <el-icon size="40" color="#67c23a"><User /></el-icon>
               </div>
               <div class="stat-info">
                 <h3>{{ stats.studentCount }}</h3>
@@ -66,6 +79,28 @@
 
     <div class="dashboard-sections">
       <el-row :gutter="20">
+        <el-col :span="12">
+          <el-card class="section-card">
+            <template #header>
+              <div class="card-header">
+                <span>用户管理</span>
+                <el-button type="primary" size="small" @click="goToUserManagement">
+                  管理用户
+                </el-button>
+              </div>
+            </template>
+            <div class="section-content">
+              <p>查看和管理系统中的所有用户信息，包括管理员、老师和学生</p>
+              <ul>
+                <li>查看用户列表</li>
+                <li>添加新用户</li>
+                <li>编辑用户信息</li>
+                <li>分配用户角色和权限</li>
+                <li>删除用户</li>
+              </ul>
+            </div>
+          </el-card>
+        </el-col>
         <el-col :span="12">
           <el-card class="section-card">
             <template #header>
@@ -137,7 +172,11 @@
     </div>
 
     <div class="dashboard-actions">
-      <el-button type="primary" size="large" @click="goToStudentManagement">
+      <el-button type="primary" size="large" @click="goToUserManagement">
+        <el-icon><Users /></el-icon>
+        用户管理
+      </el-button>
+      <el-button type="success" size="large" @click="goToStudentManagement">
         <el-icon><User /></el-icon>
         学员管理
       </el-button>
@@ -158,13 +197,14 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { User, Document, Trophy, Warning, Connection } from '@element-plus/icons-vue'
+import { User, Users, Document, Trophy, Warning, Connection } from '@element-plus/icons-vue'
 import AdminNavigation from './AdminNavigation.vue'
 
 export default {
   name: 'AdminDashboard',
   components: {
     User,
+    Users,
     Document,
     Trophy,
     Warning,
@@ -174,26 +214,34 @@ export default {
   setup() {
     const router = useRouter()
     
+    // 初始化数据
     const stats = ref({
+      userCount: 0,
       studentCount: 0,
       examCount: 0,
       activeExamCount: 0,
       assignmentCount: 0
     })
-
+    
     const loadStats = async () => {
       try {
         // 模拟统计数据
+        // 在实际项目中，这里应该从API获取真实数据
         stats.value = {
-          studentCount: 25,
-          examCount: 12,
-          activeExamCount: 3,
-          assignmentCount: 45
+          userCount: 150,  // 示例用户总数
+          studentCount: 120,
+          examCount: 50,
+          activeExamCount: 10,
+          assignmentCount: 80
         }
       } catch (error) {
         console.error('加载统计数据失败:', error)
         ElMessage.error('加载统计数据失败')
       }
+    }
+
+    const goToUserManagement = () => {
+      router.push('/admin/users')
     }
 
     const goToStudentManagement = () => {
@@ -213,11 +261,12 @@ export default {
     })
 
     return {
-      stats,
-      goToStudentManagement,
-      goToExamManagement,
-      goToAssignmentManagement
-    }
+        stats,
+        goToUserManagement,
+        goToStudentManagement,
+        goToExamManagement,
+        goToAssignmentManagement
+      }
   }
 }
 </script>
@@ -291,6 +340,11 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.card-header span {
+  font-weight: 600;
+  color: #1e3a8a;
 }
 
 .section-content p {

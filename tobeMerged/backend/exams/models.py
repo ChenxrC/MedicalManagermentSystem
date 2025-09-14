@@ -1,9 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 class Student(models.Model):
     """学员模型"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='student_profile')
     student_id = models.CharField(max_length=20, unique=True, verbose_name='学号')
     name = models.CharField(max_length=100, verbose_name='姓名')
     email = models.EmailField(verbose_name='邮箱')
@@ -25,7 +25,7 @@ class Exam(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     # 添加试卷状态字段
     is_active = models.BooleanField(default=True, verbose_name='是否启用')
     start_time = models.DateTimeField(null=True, blank=True, verbose_name='开始时间')
@@ -60,7 +60,7 @@ class AnswerOption(models.Model):
         return self.text
 
 class StudentAnswer(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer_text = models.TextField(blank=True)
     selected_option = models.ForeignKey(AnswerOption, on_delete=models.SET_NULL, null=True, blank=True)
@@ -78,7 +78,7 @@ class StudentAnswer(models.Model):
 
 class ExamSubmission(models.Model):
     """考试提交记录"""
-    student = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='学员')
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='学员')
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, verbose_name='考试')
     total_score = models.FloatField(default=0, verbose_name='总分')
     max_score = models.FloatField(default=0, verbose_name='满分')
@@ -95,20 +95,20 @@ class ExamSubmission(models.Model):
         return f"{self.student.username} - {self.exam.title} - {self.total_score}分"
 
 class Score(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
     total_score = models.FloatField(default=0)
     submitted_at = models.DateTimeField(auto_now_add=True)
 
 class Recording(models.Model):
-    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
     video_file = models.FileField(upload_to='recordings/')
     recorded_at = models.DateTimeField(auto_now_add=True)
 
 class Evaluation(models.Model):
     recording = models.ForeignKey(Recording, on_delete=models.CASCADE)
-    evaluator = models.ForeignKey(User, on_delete=models.CASCADE)
+    evaluator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     comments = models.TextField()
     score_adjustment = models.FloatField(default=0)
     evaluated_at = models.DateTimeField(auto_now_add=True)
@@ -118,7 +118,7 @@ class ExamStudentAssignment(models.Model):
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='student_assignments', verbose_name='试卷')
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='exam_assignments', verbose_name='学员')
     assigned_at = models.DateTimeField(auto_now_add=True, verbose_name='分配时间')
-    assigned_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='分配人')
+    assigned_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='分配人')
     is_active = models.BooleanField(default=True, verbose_name='是否有效')
 
     class Meta:
@@ -131,7 +131,7 @@ class ExamStudentAssignment(models.Model):
 
 class ExamSession(models.Model):
     """考试会话记录"""
-    student = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='学员')
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name='学员')
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, verbose_name='考试')
     started_at = models.DateTimeField(auto_now_add=True, verbose_name='开始时间')
     ended_at = models.DateTimeField(null=True, blank=True, verbose_name='结束时间')
