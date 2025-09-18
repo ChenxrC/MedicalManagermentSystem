@@ -164,6 +164,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Search, Refresh } from '@element-plus/icons-vue'
 import AdminNavigation from './AdminNavigation.vue'
 import { debugAPI } from '@/utils/debug.js'
+import api from '@/utils/axios'
+import { useUserStore } from '@/stores/userStore'
+import { PERMISSIONS } from '@/utils/permission.js'
 
 export default {
   name: 'ExamManagement',
@@ -176,12 +179,14 @@ export default {
   },
   setup() {
     const router = useRouter()
+    const userStore = useUserStore()
     const loading = ref(false)
     const showExamDetail = ref(false)
     const selectedExam = ref(null)
     const currentPage = ref(1)
     const pageSize = ref(20)
     const totalExams = ref(0)
+    const hasExamPermission = ref(false)
 
     const exams = ref([])
     const searchForm = reactive({
@@ -238,26 +243,30 @@ export default {
     const loadExams = async () => {
       loading.value = true
       try {
-        // 从后端API获取试卷数据
-        const response = await fetch('/api/exams/', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+        // 从后端API获取试卷数据，使用axios实例自动添加认证头
+        const response = await api.get('/exams')
         
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        
-        const data = await response.json()
+        const data = response.data
         
         // 调试信息
         debugAPI.checkResponse(response, '/api/exams/')
         debugAPI.checkData(data, '/api/exams/')
         
         // 确保数据是数组格式
-        if (Array.isArray(data)) {
+        if (data && Array.isArray(data.exams)) {
+          // 后端返回的是{'exams': exams_data}格式
+          exams.value = data.exams.map(exam => ({
+            ...exam,
+            // 添加前端组件所需的字段，确保界面正常显示
+            description: `课程ID: ${exam.course_id} 的考试`,
+            question_count: 0,  // 默认值，实际应用中应该从数据库获取
+            total_points: 100,  // 默认值
+            is_active: true,    // 默认值
+            created_by: '管理员', // 默认值
+            questions: []       // 默认空数组
+          }))
+          totalExams.value = data.exams.length
+        } else if (Array.isArray(data)) {
           exams.value = data
           totalExams.value = data.length
         } else if (data && Array.isArray(data.results)) {
@@ -353,19 +362,9 @@ export default {
           }
         )
 
-        const response = await fetch(`/api/exams/${exam.id}/`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ is_active: newStatus })
-        })
+        const response = await api.patch(`/api/exams/${exam.id}/`, { is_active: newStatus })
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-
-        const updatedExam = await response.json()
+        const updatedExam = response.data
         exam.is_active = updatedExam.is_active
         ElMessage.success(`${action}成功`)
       } catch (error) {
@@ -388,16 +387,7 @@ export default {
           }
         )
 
-        const response = await fetch(`/api/exams/${exam.id}/`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
+        await api.delete(`/api/exams/${exam.id}/`)
 
         exams.value = exams.value.filter(e => e.id !== exam.id)
         totalExams.value = exams.value.length
@@ -424,8 +414,35 @@ export default {
       return new Date(dateString).toLocaleString('zh-CN')
     }
 
-    onMounted(() => {
-      loadExams()
+    const checkPermissions = async () => {
+      // 确保用户已登录
+      if (!userStore.isAuthenticated) {
+        await userStore.initUser()
+      }
+      
+      // 检查是否有查看考试的权限
+      hasExamPermission.value = userStore.hasPermission(PERMISSIONS.VIEW_EXAMS)
+      
+      console.log('用户权限检查结果:', {
+        isAuthenticated: userStore.isAuthenticated,
+        userRole: userStore.currentUser?.role,
+        hasExamPermission: hasExamPermission.value,
+        allPermissions: userStore.currentUser?.permissions
+      })
+      
+      if (!hasExamPermission.value) {
+        ElMessage.warning('您没有查看试卷管理的权限')
+        // 保留模拟数据以便展示界面
+        exams.value = mockExams
+        totalExams.value = mockExams.length
+      }
+    }
+
+    onMounted(async () => {
+      await checkPermissions()
+      if (hasExamPermission.value) {
+        loadExams()
+      }
     })
 
     return {
