@@ -125,9 +125,11 @@ export default {
       this.loading = true
       try {
         const response = await getExams()
-        this.exams = response.data
+        // 正确获取考试数据，后端返回格式为{exams: [...]}
+        this.exams = response.data && response.data.exams ? response.data.exams : []
       } catch (error) {
         console.error('获取考试列表失败:', error)
+        this.exams = []
       } finally {
         this.loading = false
       }
@@ -135,17 +137,21 @@ export default {
     async fetchCourses() {
       try {
         const response = await getCourses()
-        this.courses = response.data
+        // 正确获取课程数据，后端返回格式为{courses: [...]}
+        this.courses = response.data && response.data.courses ? response.data.courses : []
       } catch (error) {
         console.error('获取课程列表失败:', error)
+        this.courses = []
       }
     },
     async fetchQuestions() {
       try {
         const response = await getQuestions()
-        this.questions = response.data
+        // 正确获取题目数据，后端返回格式为{questions: [...]}        
+        this.questions = response.data && response.data.questions ? response.data.questions : []
       } catch (error) {
         console.error('获取题目列表失败:', error)
+        this.questions = []
       }
     },
     onCreateExam() {
