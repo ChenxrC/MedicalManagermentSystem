@@ -77,18 +77,7 @@
         </div>
       </el-card>
       
-      <el-card class="feature-card enhanced-card hover-scale" shadow="hover">
-        <template #header>
-          <div class="card-header">
-            <el-icon class="feature-icon"><ChatDotRound /></el-icon>
-            <span>知识库问答</span>
-          </div>
-        </template>
-        <p>基于知识库的智能问答系统，帮助您快速获取信息。</p>
-        <div class="card-footer">
-          <el-button type="primary" class="enhanced-button" @click="toggleChatbot">立即体验</el-button>
-        </div>
-      </el-card>
+
       
     </div>
   </div>
@@ -110,28 +99,14 @@
       </template>
     </el-dialog>
 
-    <!-- 知识库问答聊天机器人 -->
-    <div class="chatbot-container">
-      <div class="chatbot-toggle" @click="toggleChatbot">
-        <el-icon v-if="!chatbotVisible"><ChatDotRound /></el-icon>
-        <el-icon v-else><Close /></el-icon>
-      </div>
-      <div v-show="chatbotVisible" class="chatbot-iframe">
-        <iframe 
-          src="https://udify.app/chatbot/5O3wFflOxVUinqz9" 
-          style="width: 100%; height: 100%; min-height: 700px" 
-          frameborder="0" 
-          allow="microphone"> 
-        </iframe>
-      </div>
-    </div>
+    <!-- 知识库问答聊天机器人 (已暂时移除外部资源引用) -->
   </div>
 </template>
 
 <script>
-import { Document, Edit, User, ChatDotRound, Close, Upload } from '@element-plus/icons-vue'
+import { Document, Edit, User, Upload } from '@element-plus/icons-vue'
 import { onMounted, onUnmounted } from 'vue'
-import { isAuthenticated, getUserInfo } from '@/services/auth'
+import { getToken, getCurrentUser } from '@/services/auth'
 import { getPublishedDocuments } from '@/services/api'
 
 export default {
@@ -140,13 +115,10 @@ export default {
     Document,
     Edit,
     User,
-    ChatDotRound,
-    Close,
     Upload
   },
   data() {
     return {
-      chatbotVisible: false,
       isAuthenticated: false,
       publishedDocuments: [],
       loading: false,
@@ -156,12 +128,9 @@ export default {
     }
   },
   methods: {
-    toggleChatbot() {
-      this.chatbotVisible = !this.chatbotVisible
-    },
     checkAuthStatus() {
-      this.isAuthenticated = isAuthenticated()
-      const userInfo = getUserInfo()
+      this.isAuthenticated = !!getToken()
+      const userInfo = getCurrentUser()
       this.userRole = userInfo ? userInfo.role : ''
     },
     async fetchPublishedDocuments() {
@@ -394,43 +363,6 @@ export default {
   background-color: rgba(64, 158, 255, 0.05);
 }
 
-/* 聊天机器人样式 */
-.chatbot-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-}
-
-.chatbot-toggle {
-  width: 60px;
-  height: 60px;
-  background-color: #409eff;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(64, 158, 255, 0.4);
-  color: white;
-  font-size: 24px;
-}
-
-.chatbot-toggle:hover {
-  background-color: #66b1ff;
-}
-
-.chatbot-iframe {
-  position: fixed;
-  bottom: 90px;
-  right: 20px;
-  width: 400px;
-  height: 600px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-}
 
 /* Element Plus 组件样式覆盖 */
 .enhanced-card {
@@ -523,10 +455,5 @@ export default {
     font-size: 16px;
   }
   
-  .chatbot-iframe {
-    width: calc(100vw - 40px);
-    height: 500px;
-    right: 20px;
-  }
 }
 </style>

@@ -1,138 +1,176 @@
 <template>
   <div class="login-container">
-    <div class="login-form-wrapper">
-      <h2>用户登录</h2>
-      <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules" label-width="80px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="loginForm.username" placeholder="请输入用户名"></el-input>
-        </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <el-input v-model="loginForm.password" type="password" placeholder="请输入密码"></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleLogin" :loading="loading" style="width: 100%">登录</el-button>
-        </el-form-item>
-        <el-form-item>
-          <el-button type="default" @click="goToHome" style="width: 100%">返回主页</el-button>
-        </el-form-item>
-        <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
-      </el-form>
-    </div>
+    <el-form
+      ref="loginFormRef"
+      v-model="loginForm"
+      :rules="loginRules"
+      class="login-form"
+      label-position="left"
+    >
+      <div class="title-container">
+        <h3 class="title">欢迎登录</h3>
+      </div>
+      <el-form-item prop="username">
+        <el-input
+          v-model="loginForm.username"
+          type="text"
+          placeholder="用户名"
+          name="username"
+          autocomplete="on"
+        />
+      </el-form-item>
+      <el-form-item prop="password">
+        <el-input
+          v-model="loginForm.password"
+          type="password"
+          placeholder="密码"
+          name="password"
+          show-password
+          autocomplete="on"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-checkbox
+          v-model="loginForm.rememberMe"
+          style="margin: 0 auto 20px 0"
+        >
+          记住密码
+        </el-checkbox>
+      </el-form-item>
+      <el-form-item>
+        <el-button
+          type="primary"
+          style="width: 100%"
+          :loading="loading"
+          @click="handleLogin"
+        >
+          登录
+        </el-button>
+      </el-form-item>
+      <div class="register-link">
+        <span>还没有账号？</span>
+        <el-button
+          type="text"
+          @click="handleRegister"
+        >
+          立即注册
+        </el-button>
+      </div>
+    </el-form>
   </div>
 </template>
 
-<script>
-import { useUserStore } from '@/stores/userStore'
+<script setup>
+import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
-import { defineComponent, ref, reactive } from 'vue'
+import { useUserStore } from '@/stores/userStore.js'
 
-export default defineComponent({
-  name: 'LoginView',
-  setup() {
-    const userStore = useUserStore()
-    const router = useRouter()
-    const loginForm = reactive({
-      username: '',
-      password: ''
-    })
-    const loading = ref(false)
-    const errorMessage = ref('')
-    const loginFormRef = ref(null)
-    
-    const loginRules = {
-      username: [
-        { required: true, message: '请输入用户名', trigger: 'blur' }
-      ],
-      password: [
-        { required: true, message: '请输入密码', trigger: 'blur' }
-      ]
-    }
-    
-    const handleLogin = async () => {
-      if (!loginFormRef.value) {
-        console.error('表单引用未找到')
-        return
-      }
-      
-      loginFormRef.value.validate(async (valid) => {
-        if (valid) {
-          loading.value = true
-          errorMessage.value = ''
-          
-          try {
-            const result = await userStore.login(loginForm)
-            if (result.success) {
-              ElMessage.success('登录成功')
-              
-              // 根据用户角色重定向到不同页面
-          const userRole = userStore.currentUser?.role
-          if (userRole === 'admin') {
-            router.push('/admin')
-          } else if (userRole === 'teacher') {
-            router.push('/student-exams')
-          } else if (userRole === 'student') {
-            router.push('/student-exams')
-          } else {
-            router.push('/')
-          }
-            } else {
-              errorMessage.value = result.error || '登录失败'
-            }
-          } catch (error) {
-            errorMessage.value = '登录失败，请检查用户名和密码'
-            console.error('登录错误:', error)
-          } finally {
-            loading.value = false
-          }
-        }
-      })
-    }
-    
-    const goToHome = () => {
-      router.push('/')
-    }
+const router = useRouter()
+const loading = ref(false)
+const loginFormRef = ref(null)
+const userStore = useUserStore()
 
-    return {
-      loginForm,
-      loading,
-      errorMessage,
-      loginRules,
-      handleLogin,
-      loginFormRef,
-      goToHome
-    }
-  }
+const loginForm = reactive({
+  username: '',
+  password: '',
+  rememberMe: false
 })
+
+const loginRules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: ['blur', 'change'] }
+  ],
+  password: [
+    { required: true, message: '请输入密码', trigger: ['blur', 'change'] }
+  ]
+}
+
+const handleLogin = async () => {
+  try {
+    await loginFormRef.value.validate()
+    loading.value = true
+    // 使用userStore进行登录
+    const res = await userStore.login(loginForm)
+    
+    if (res.success) {
+      ElMessage.success('登录成功')
+      // 登录成功后手动刷新用户状态
+      await userStore.initUser()
+      // 根据用户角色决定跳转路径
+      if (userStore.userRole === 'admin') {
+        router.push('/admin')
+      } else if (userStore.userRole === 'student') {
+        router.push('/student-exams')
+      } else {
+        router.push('/')
+      }
+    } else {
+      ElMessage.error(res.error || '登录失败')
+    }
+  } catch (error) {
+    ElMessage.error('登录失败，请重试')
+    console.error('登录错误:', error)
+  } finally {
+    loading.value = false
+  }
+}
+
+const handleRegister = () => {
+  router.push('/register')
+}
 </script>
 
 <style scoped>
 .login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background-color: #f5f5f5;
 }
 
-.login-form-wrapper {
+.login-form {
   width: 400px;
-  padding: 30px;
-  background-color: #fff;
-  border-radius: 8px;
+  padding: 40px;
+  background: white;
+  border-radius: 10px;
   box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 }
 
-.login-form-wrapper h2 {
+.title-container {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.title {
+  font-size: 24px;
   color: #303133;
 }
 
-.error-message {
-  color: #f56c6c;
-  font-size: 14px;
+.svg-container {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: #f5f7fa;
+  border-radius: 50%;
+  margin-right: 15px;
+  vertical-align: middle;
+}
+
+.register-link {
   text-align: center;
-  margin-top: 10px;
+  margin-top: 20px;
+  color: #606266;
+}
+
+.register-link .el-button {
+  color: #409eff;
+}
+
+.register-link .el-button:hover {
+  color: #66b1ff;
 }
 </style>

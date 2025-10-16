@@ -465,7 +465,7 @@ export default {
         saving.value = true
         saveSuccess.value = false
         
-        const response = await axios.post('/api/exams/', exam)
+        const response = await axios.post('/exams/', exam)
         
         ElMessage.success('试卷保存成功！')
         saveSuccess.value = true
@@ -534,14 +534,14 @@ export default {
           questionData.image = newQuestion.image
         }
         
-        const response = await axios.post('/api/exams/questions/', questionData)
+        const response = await axios.post('/exams/questions/', questionData)
         
         // 如果是选择题，创建选项
         if (isMultipleChoice.value) {
           const questionId = response.data.id
           for (const option of newQuestion.options) {
             if (option.text.trim()) {
-              await axios.post('/api/exams/answeroptions/', {
+              await axios.post('/exams/answeroptions/', {
                 question: questionId,
                 text: option.text,
                 is_correct: option.is_correct
@@ -570,7 +570,7 @@ export default {
     const fetchQuestions = async () => {
       try {
         loadingQuestions.value = true
-        const response = await axios.get(`/api/exams/questions/?exam=${exam.id}`)
+        const response = await axios.get(`/exams/questions/?exam=${exam.id}`)
         
         // 确保questions是一个数组
         if (response.data && Array.isArray(response.data)) {
@@ -614,7 +614,7 @@ export default {
           }
         )
         
-        await axios.delete(`/api/exams/questions/${questionId}/`)
+        await axios.delete(`/exams/questions/${questionId}/`)
         ElMessage.success('问题删除成功！')
         
         // 确保questions是数组后再进行过滤

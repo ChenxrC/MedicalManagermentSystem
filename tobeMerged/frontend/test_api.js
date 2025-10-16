@@ -13,9 +13,9 @@ async function testApiEndpoints() {
   
   try {
     // 测试用户信息端点
-    console.log('1. 测试用户信息端点 (/api/auth/me):');
+    console.log('1. 测试用户信息端点 (/auth/me):');
     try {
-      const response = await api.get('/api/auth/me');
+      const response = await api.get('/auth/me');
       console.log('  状态码:', response.status);
       console.log('  响应数据:', response.data);
     } catch (error) {
@@ -24,9 +24,9 @@ async function testApiEndpoints() {
     }
     
     // 测试登录端点（使用示例凭据）
-    console.log('\n2. 测试登录端点 (/api/auth/login):');
+    console.log('\n2. 测试登录端点 (/auth/login):');
     try {
-      const response = await api.post('/api/auth/login', {
+      const response = await api.post('/auth/login', {
         username: 'testuser', // 这里使用实际存在的用户名
         password: 'testpassword' // 这里使用实际密码
       });

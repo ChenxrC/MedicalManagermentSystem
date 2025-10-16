@@ -317,9 +317,9 @@ export default {
       try {
         // 从后端API获取数据
         const [assignmentsResponse, examsResponse, studentsResponse] = await Promise.all([
-          axios.get('/api/exam-assignments/'),
-          axios.get('/api/exams/'),
-          axios.get('/api/students/')
+          axios.get('/exam-assignments/'),
+          axios.get('/exams/'),
+          axios.get('/students/')
         ])
 
         const assignmentsData = assignmentsResponse.data
@@ -457,7 +457,7 @@ export default {
           }
         )
 
-        const response = await axios.post(`/api/exam-assignments/${assignment.id}/remove_assignment/`)
+        const response = await axios.post(`/exam-assignments/${assignment.id}/remove_assignment/`)
 
         if (response.status !== 200) {
           throw new Error(`HTTP error! status: ${response.status}`)
@@ -491,7 +491,7 @@ export default {
 
         // 批量创建分配记录
         const assignmentPromises = targetStudents.map(student => 
-          axios.post('/api/exam-assignments/', {
+          axios.post('/exam-assignments/', {
             exam: assignmentForm.exam_id,
             student: student.id,
             assigned_by: 1  // 添加分配人字段，这里使用默认管理员ID

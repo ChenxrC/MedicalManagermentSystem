@@ -363,12 +363,24 @@ export default {
     const fetchUsers = async () => {
       loading.value = true
       try {
-        const response = await api.get('/api/users/users/')
-        users.value = response.data.users || response.data
+        console.log('正在请求用户列表，使用正确路径: /users')
+        const response = await api.get('/users')
+        console.log('API响应数据:', response.data)
+        console.log('API响应状态码:', response.status)
+        // 确保正确获取用户列表数据
+        if (response.data && response.data.users) {
+          users.value = response.data.users
+        } else {
+          users.value = response.data || []
+        }
         totalUsers.value = users.value.length
+        console.log('处理后的用户列表:', users.value)
+        console.log('用户总数:', totalUsers.value)
       } catch (error) {
         console.error('获取用户列表失败:', error)
-        ElMessage.error('获取用户列表失败')
+        console.error('错误详情:', error.response)
+        console.error('错误消息:', error.message)
+        ElMessage.error('获取用户列表失败: ' + (error.message || '未知错误'))
       } finally {
         loading.value = false
       }
@@ -429,7 +441,7 @@ export default {
             bio: userForm.value.bio
           }
           
-          await api.put(`/api/users/users/${editingUser.value.id}/`, userData)
+          await api.put(`/users/${editingUser.value.id}`, userData)
           ElMessage.success('用户信息更新成功')
         } else {
           // 创建用户
@@ -438,7 +450,7 @@ export default {
             role: 'student' // 默认创建学生角色
           }
           
-          await api.post('/api/users/users/', userData)
+          await api.post('/users', userData)
           ElMessage.success('用户创建成功')
         }
         
@@ -466,7 +478,7 @@ export default {
           }
         )
         
-        await api.delete(`/api/users/users/${user.id}/`)
+        await api.delete(`/users/${user.id}`)
         ElMessage.success('用户删除成功')
         await fetchUsers()
       } catch (error) {
@@ -528,7 +540,7 @@ export default {
           role: roleDialogData.value.newRole
         }
         
-        await api.patch(`/api/users/users/${roleDialogData.value.id}/`, userData)
+        await api.patch(`/users/${roleDialogData.value.id}`, userData)
         ElMessage.success('角色更新成功')
         showRoleDialog.value = false
         await fetchUsers()

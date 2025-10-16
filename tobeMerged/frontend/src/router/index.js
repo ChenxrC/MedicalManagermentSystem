@@ -1,9 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Viewer from '@/views/Viewer.vue'
-import { setupRouteGuards } from './guards'
 
 const routes = [
-  { path: '/', name: 'Home', component: () => import('@/views/HomeView.vue') },
   {
     path: '/login',
     name: 'LoginView',
@@ -15,34 +12,77 @@ const routes = [
     component: () => import('@/views/RegisterView.vue')
   },
   {
-    path: '/viewer',
-    name: 'Viewer',
-    component: Viewer
+    path: '/',
+    name: 'Home',
+    component: () => import('@/views/HomeView.vue'),
+    meta: {
+      requiresAuth: true
+    }
   },
-  { path: '/exam-editor', component: () => import('@/components/ExamEditor.vue') },
-  { path: '/student-login', component: () => import('@/components/StudentLogin.vue') },
-  { path: '/student-exams', component: () => import('@/components/StudentExamList.vue') },
-  { path: '/student-courses', component: () => import('@/components/StudentCourseList.vue') },
-  { path: '/login-test', component: () => import('@/components/StudentLoginTest.vue') },
-  { path: '/simple-test', component: () => import('@/components/SimpleLoginTest.vue') },
-  { path: '/validation-test', component: () => import('@/components/FormValidationTest.vue') },
-  { path: '/login-debug', component: () => import('@/components/LoginTest.vue') },
-  { path: '/login-debug-test', component: () => import('@/components/LoginDebugTest.vue') },
-  { path: '/answer/:examId', component: () => import('@/components/AnswerInterface.vue') },
-  { path: '/grading/:studentId/:examId', component: () => import('@/components/GradingInterface.vue') },
-  { path: '/scores', component: () => import('@/components/ScoreView.vue') },
-  { path: '/wrong-analysis', component: () => import('@/components/WrongAnalysis.vue') },
-  { path: '/account', component: () => import('@/components/AccountManagement.vue') },
-  { path: '/evaluate-video/:recordingId', component: () => import('@/components/VideoEvaluation.vue') },
-  // 新增管理页面路由
-  { path: '/admin', component: () => import('@/components/AdminDashboard.vue') },
-  { path: '/admin/users', component: () => import('@/components/UserManagement.vue') },
-  { path: '/admin/students', component: () => import('@/components/StudentManagement.vue') },
-  { path: '/admin/exams', component: () => import('@/components/ExamManagement.vue') },
-  { path: '/admin/assignments', component: () => import('@/components/AssignmentManagement.vue') },
-  { path: '/permission-test', component: () => import('@/views/PermissionTest.vue') },
-  { path: '/api-test', component: () => import('@/components/APITest.vue') },
-  { path: '/test-button', component: () => import('@/components/TestButton.vue') }
+  {
+    path: '/admin',
+    name: 'AdminDashboard',
+    component: () => import('@/views/AdminDashboard.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true
+    }
+  },
+  {
+    path: '/student-exams',
+    name: 'StudentExams',
+    component: () => import('@/views/StudentExams.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresStudent: true
+    }
+  },
+  {
+    path: '/documents',
+    name: 'Documents',
+    component: () => import('@/views/DocumentsView.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  },
+  // 管理系统子路由
+  {
+    path: '/admin/users',
+    name: 'UserManagement',
+    component: () => import('@/components/UserManagement.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true
+    }
+  },
+  {
+    path: '/admin/exams',
+    name: 'ExamManagement',
+    component: () => import('@/components/ExamManagement.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true
+    }
+  },
+  {    path: '/admin/assignments',    name: 'ExamAssignment',    component: () => import('@/components/ExamAssignment.vue'),    meta: {      requiresAuth: true,      requiresAdmin: true    }  },  // 考试系统路由
+  {
+    path: '/student/exams',
+    name: 'StudentExamList',
+    component: () => import('@/components/StudentExamList.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresStudent: true
+    }
+  },
+  {
+    path: '/admin-center',
+    name: 'AdminCenter',
+    component: () => import('@/components/AdminCenter.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true
+    }
+  }
 ]
 
 const router = createRouter({
@@ -50,7 +90,45 @@ const router = createRouter({
   routes
 })
 
-// 设置路由守卫
-setupRouteGuards(router)
+// 全局路由守卫
+router.beforeEach((to, from, next) => {
+  // 检查路由是否需要认证
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    // 检查是否已登录，使用统一的access_token键名
+    const token = localStorage.getItem('access_token')
+    if (!token) {
+      // 未登录，重定向到登录页
+      next({
+        path: '/login',
+        query: { redirect: to.fullPath }
+      })
+      return
+    }
+    
+    // 检查是否需要管理员权限
+    if (to.matched.some(record => record.meta.requiresAdmin)) {
+      const userRole = localStorage.getItem('user_role')
+      if (userRole !== 'admin') {
+        next({ path: '/' })
+        return
+      }
+    }
+    
+    // 检查是否需要学生权限
+    if (to.matched.some(record => record.meta.requiresStudent)) {
+      const userRole = localStorage.getItem('user_role')
+      if (userRole !== 'student') {
+        next({ path: '/' })
+        return
+      }
+    }
+    
+    // 已登录且权限匹配，继续访问
+    next()
+  } else {
+    // 不需要认证的路由，直接访问
+    next()
+  }
+})
 
 export default router

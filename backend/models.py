@@ -2,6 +2,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 # 从extensions导入db实例
 from extensions import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -63,7 +64,7 @@ class ExamResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     exam_id = db.Column(db.Integer, db.ForeignKey('exam.id'), nullable=False)
     student_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    score = db.Column(db.Float, nullable=False)
+    score = db.Column(db.Float, nullable=True)
     answers = db.Column(db.JSON)  # 存储学生答案
     submitted_at = db.Column(db.DateTime, default=db.func.current_timestamp())
     

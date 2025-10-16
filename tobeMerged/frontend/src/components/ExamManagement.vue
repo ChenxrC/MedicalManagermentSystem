@@ -244,7 +244,7 @@ export default {
       loading.value = true
       try {
         // 从后端API获取试卷数据，使用axios实例自动添加认证头
-        const response = await api.get('/exams')
+        const response = await api.get('/api/exams')
         
         const data = response.data
         

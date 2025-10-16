@@ -36,7 +36,7 @@ const teacherRoutes = [
 
 // 路由守卫
 export function setupRouteGuards(router) {
-  router.beforeEach((to, from, next) => {
+  router.beforeEach(async (to, from, next) => {
     const userStore = useUserStore()
     
     // 检查是否是受保护的路由
@@ -54,9 +54,10 @@ export function setupRouteGuards(router) {
       to.path === route || to.path.startsWith(route)
     )
     
-    // 初始化用户状态
-    if (isProtected && !userStore.isAuthenticated) {
-      userStore.initUser()
+    // 避免在登录页面反复初始化用户状态，导致刷新循环
+    if (isProtected && !userStore.isAuthenticated && to.path !== '/login') {
+      // 只在非登录页面初始化用户状态
+      await userStore.initUser()
     }
     
     // 如果已登录且访问登录页或注册页，重定向到适当页面

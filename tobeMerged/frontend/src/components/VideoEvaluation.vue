@@ -19,11 +19,11 @@ export default {
     const evaluation = ref({ comments: '', score_adjustment: 0 })
     // fetch recording
     const fetchRecording = async () => {
-      const response = await axios.get(`/api/exams/recordings/${props.recordingId}/`)
+      const response = await axios.get(`/exams/recordings/${props.recordingId}/`)
       recording.value = response.data
     }
     const saveEvaluation = async () => {
-      await axios.post('/api/exams/evaluations/', { ...evaluation.value, recording: props.recordingId })
+      await axios.post('/exams/evaluations/', { ...evaluation.value, recording: props.recordingId })
     }
     fetchRecording()
     return { recording, evaluation, saveEvaluation }

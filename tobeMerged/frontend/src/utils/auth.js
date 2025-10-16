@@ -3,13 +3,13 @@ import api from './axios';
 
 // 用户注册
 export const register = async (userData) => {
-  const response = await api.post('/api/auth/register', userData);
+  const response = await api.post('/auth/register', userData);
   return response.data;
 };
 
 // 用户登录
 export const login = async (credentials) => {
-  const response = await api.post('/api/auth/login', credentials);
+  const response = await api.post('/auth/login', credentials);
   
   // 保存令牌和用户信息到本地存储
   if (response.data && response.data.data) {

@@ -33,6 +33,11 @@
         <span>试卷分配</span>
       </el-menu-item>
       
+      <el-menu-item index="/admin/permissions" v-if="currentUser?.role === 'admin'">
+        <el-icon><Key /></el-icon>
+        <span>权限管理</span>
+      </el-menu-item>
+      
       <div class="user-section">
         <span class="username">{{ currentUser?.username || '管理员' }}</span>
         <el-button type="text" @click="handleLogout" class="logout-btn">
@@ -48,7 +53,7 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Setting, User, Users, Document, Connection, SwitchButton } from '@element-plus/icons-vue'
+import { Setting, User, Users, Document, Connection, SwitchButton, Key } from '@element-plus/icons-vue'
 import { useUserStore } from '@/stores/userStore'
 
 export default {
@@ -56,6 +61,7 @@ export default {
   components: {
     Setting,
     User,
+    Users,
     Document,
     Connection,
     SwitchButton

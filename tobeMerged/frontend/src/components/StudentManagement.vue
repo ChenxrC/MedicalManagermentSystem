@@ -159,6 +159,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Search, Refresh } from '@element-plus/icons-vue'
 import AdminNavigation from './AdminNavigation.vue'
+import axios from 'axios'
 
 export default {
   name: 'StudentManagement',
@@ -256,18 +257,9 @@ export default {
       loading.value = true
       try {
         // 从后端API获取学员数据
-        const response = await fetch('/api/students/', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
+        const response = await axios.get('/students/')
         
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`)
-        }
-        
-        const data = await response.json()
+        const data = response.data
         
         // 确保数据是数组格式
         if (Array.isArray(data)) {

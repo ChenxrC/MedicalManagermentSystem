@@ -1,11 +1,13 @@
 // API工具函数
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'http://localhost:8000' 
-  : 'http://localhost:8000'
+  ? 'http://localhost:5001' 
+  : 'http://localhost:5001'
 
 // 通用请求函数
 export const apiRequest = async (endpoint, options = {}) => {
-  const url = `${API_BASE_URL}${endpoint}`
+  // 确保endpoint以/api开头
+  const apiEndpoint = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`
+  const url = `${API_BASE_URL}${apiEndpoint}`
   
   const defaultOptions = {
     headers: {
@@ -36,22 +38,22 @@ export const apiRequest = async (endpoint, options = {}) => {
 // 学员相关API
 export const studentAPI = {
   // 获取学员列表
-  getStudents: () => apiRequest('/api/students/'),
+  getStudents: () => apiRequest('/students/'),
   
   // 创建学员
-  createStudent: (data) => apiRequest('/api/students/', {
+  createStudent: (data) => apiRequest('/students/', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
   
   // 更新学员
-  updateStudent: (id, data) => apiRequest(`/api/students/${id}/`, {
+  updateStudent: (id, data) => apiRequest(`/students/${id}/`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
   
   // 删除学员
-  deleteStudent: (id) => apiRequest(`/api/students/${id}/`, {
+  deleteStudent: (id) => apiRequest(`/students/${id}/`, {
     method: 'DELETE',
   }),
 }
@@ -59,27 +61,27 @@ export const studentAPI = {
 // 试卷相关API
 export const examAPI = {
   // 获取试卷列表
-  getExams: () => apiRequest('/api/exams/'),
+  getExams: () => apiRequest('/exams/'),
   
   // 创建试卷
-  createExam: (data) => apiRequest('/api/exams/', {
+  createExam: (data) => apiRequest('/exams/', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
   
   // 更新试卷
-  updateExam: (id, data) => apiRequest(`/api/exams/${id}/`, {
+  updateExam: (id, data) => apiRequest(`/exams/${id}/`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
   
   // 删除试卷
-  deleteExam: (id) => apiRequest(`/api/exams/${id}/`, {
+  deleteExam: (id) => apiRequest(`/exams/${id}/`, {
     method: 'DELETE',
   }),
   
   // 更新试卷状态
-  updateExamStatus: (id, isActive) => apiRequest(`/api/exams/${id}/`, {
+  updateExamStatus: (id, isActive) => apiRequest(`/exams/${id}/`, {
     method: 'PATCH',
     body: JSON.stringify({ is_active: isActive }),
   }),
@@ -88,16 +90,16 @@ export const examAPI = {
 // 试卷分配相关API
 export const assignmentAPI = {
   // 获取分配列表
-  getAssignments: () => apiRequest('/api/exam-assignments/'),
+  getAssignments: () => apiRequest('/exam-assignments/'),
   
   // 创建分配
-  createAssignment: (data) => apiRequest('/api/exam-assignments/', {
+  createAssignment: (data) => apiRequest('/exam-assignments/', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
   
   // 移除分配
-  removeAssignment: (id) => apiRequest(`/api/exam-assignments/${id}/remove_assignment/`, {
+  removeAssignment: (id) => apiRequest(`/exam-assignments/${id}/remove_assignment/`, {
     method: 'POST',
   }),
 }
